@@ -4,6 +4,7 @@ title: 'Reproducible Research: Assignment No 1'
 author: "Mariya Atanasova"
 date: "Saturday, February 07, 2015"
 output: html_document
+keep_md: true
 ---
 ###Loading the necessary libraries and setting the constants
 ```{r ,echo=TRUE,results='hide', message=FALSE, warning=FALSE}
