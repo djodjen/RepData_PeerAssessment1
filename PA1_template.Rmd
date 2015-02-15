@@ -66,66 +66,37 @@ Note: Now with maxAveragePeriod variable we can easily display Which 5-minute in
 
 ### Imputing Missing Values
 
----
-copyright:
-title: 'Reproducible Research: Assignment No 1'
-author: "Mariya Atanasova"
-date: "Saturday, February 07, 2015"
-output: html_document
----
-###Loading the necessary libraries and setting the constants
-```{r ,echo=TRUE,results='hide', message=FALSE, warning=FALSE}
-library(dplyr)
-setwd("C:/coursera/ReproducibleResearch")
-fileName <- "activity.csv"
-```
+Note that there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.
 
-### Loading and Preprocessing the data 
-Will read the data from the data file that we have downloaded locally and unzipped and then load this data into **actData**   
-Making sure all columns are strings 
-
-```{r, echo=TRUE,results='asis'}
-actData <- read.csv(fileName, header=TRUE, stringsAsFactors=FALSE)
-actData <- tbl_df(actData)
-summary(actData)
-```
-
-### Calculating the mean for the total number of steps taken per day 
-Ignoring missing values
-
-1. Calculate the total number of steps taken per day
-2. Make a histogram of the total number of steps taken each day
-3. Calculate and report the mean and median of the total number of steps taken per day
+1.Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
 
 ```{r}
-cleanActData <- filter(actData, !is.na(actData$steps))
-cleanActData <- mutate(cleanActData, date=as.Date(date))
-byDay <- group_by(cleanActData, date)
-stepsDaily <- summarize(byDay, sum_steps=sum(steps), mean_steps=mean(steps))
-
-print(stepsDaily) #table containing total number of steps per day
-hist(stepsDaily$sum_steps, xlab="Total number of steps taken per day", main="Histogram: Total number of steps")
-
-#####need to sort bofore taking median value!!!!!!!!!!
-stepsDaily <- arrange(stepsDaily, sum_steps)
-mean(stepsDaily$sum_steps)
-median(stepsDaily$sum_steps)
-                 
+naActData <- filter(actData, is.na(actData$steps))
+nrow(naActData)
 ```
 
-###Average Daily Activity Pattern 
 
-The code below will make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+    The strategy for filling in all of the missing values in the dataset is the following: replace the NA value with the mean for that 5 minute interval. The reason I am not choosing the mean for the day is that there are whole days where all the values are NA, while each and every interval has a mean
+    Create a new dataset that is equal to the original dataset but with the missing data filled in.
+    
+```{r}
+## for a given 5 minute interval: i.e. 0, 5, 10... will return the mean of the steps per that interval.
+## Does a lookup at stepsByInterval dataset
+averageStepsPerInterval <- function(x)
+{
+    intervalRows <- filter(stepsByInterval, interval==x)
+    return(intervalRows$avg_steps_by_interval)    
+}
+
+
+```
+
+    Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
 
 
 ```{r}
+##imputedActData
 
-byInterval <- group_by(cleanActData, interval)
-stepsByInterval <- summarize(byInterval, avg_steps_by_interval=mean(steps))
-plot(stepsByInterval, type='l', xlab="x-axis: 5-minute interval", ylab="y-axis: Average number of steps taken accross all days")
 
-maxAveragePeriod <- filter(stepsByInterval, avg_steps_by_interval==max(avg_steps_by_interval))
 ```
-
-Note: Now with maxAveragePeriod variable we can easily display Which 5-minute interval (answer: at exactly `r maxAveragePeriod$interval` minutes), on average across all the days in the dataset, contains the maximum number of steps averaged accross all days (hint: max number of steps =  `r maxAveragePeriod$avg_steps_by_interval `)
